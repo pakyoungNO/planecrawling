@@ -1,0 +1,50 @@
+ 네이버 비행기예약표를 크롤링을 해서 엑셀표로 변환하여 전달하기.
+1. 크롤링 가능한 환경 만들기
+selenium 과 webdrive 라이브러리 생성
+%문제1. pip install selenium이 cmd에서 실행 안됨 
+시스템변수에 집어넣고 실행시켜봤으나 소요없음. --> 일단 cmd 위치를 Scripts 로 옮겨서 pip에 접근함
+
+크롤링 코드 찾기
+%문제1. selenium.common.exceptions.WebDriverException: Message: 'chromedriver' executable needs to be in PATH
+여기에 크롬 드라이버가 절대경로로 작성되어야한다는 사실을 확인하고 executable_path='절대경로로 작성 \대신 /로 작성'
+driver = webdriver.Chrome(executable_path='C:/user/크롤링/chromedriver.exe')
+-------------------------------------------------------------------------------------------------
+
+%문제 발생
+크롤링은 맞지만 난 크롤링으로 조작하는 내용을 다루는 블로그를 보았다. 
+난 한 페이지를 크롤링하여 그부분의 내용을 가져와야한다.
+
+
+
+크롤링하기 위한 코드 작성
+
+%정보    출발 시간정보 dd.txt_time ng-binding  ----> 이거 각 컨테이너에 3개씩 들어있음. 첫번째거가 맞음
+            컨테이너이름  li.trip_result_item ng-scope  총 30개 들어있음
+            비행기표 가격 span.txt_pay ng-binding  각 컨테이너에 1개씩 들어있음.
+
+%문제1. for con in container:
+                    departing = con.select_one("dd.txt_time ng-binding").text.strip()
+                    price = con.select_one("span.txt_pay ng-binding").text.strip()
+                    print("7월7일 광주->서울", "/", departing, "/", price)
+
+container = soup.select("li.trip_result_item ng-scope")
+이부분부터가 잘못되어서 인식을 못함.
+
+이부분에 문제가 있어서 프로그램이 작동이 안된다. 내 생각엔 FOR문의 문제같다.
+
+%정보 css selector 를 사용하여 인식시켜보겠다
+#content > div.result_page.ng-scope > div > div.trip_result.ng-scope > ul > li:nth-child(1)
+dl > dd.txt_time.ng-binding
+dl:nth-child(1) > dd.txt_time.ng-binding
+ div.txt_total > span.txt_pay.ng-binding
+
+
+%해결 
+위에서 for문을 인식 못한다고 표현했으나 그것이 아니라    class=" dasads saddas"이런 부분을
+그대로 갖다가 쓰면 li.dasads saddas 형식이 되어버리는데 이때 ' '이러한 띄어쓰기는 
+자식을 가리키므로 문제가 되었던 것이다. 즉, <ul><li class=" dasads saddas"><ul>이런식이라면 
+ul을 가리키는 것이다.
+
+크롤링후 정보들을 엑셀파일로 전달하는 방법 찾기
+
+엑셀로 변환하기 
